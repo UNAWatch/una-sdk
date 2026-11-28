@@ -139,3 +139,6 @@ target_link_libraries(una-sdk-host-tests PRIVATE
 
 enable_testing()
 add_test(NAME una-sdk-host-tests COMMAND una-sdk-host-tests)
+
+# TrackRun keeps its tests with the app; they build and run here too.
+add_subdirectory("${UNA_SDK_ROOT}/Examples/Apps/TrackRun/Tests/Host" trackrun)

@@ -9,7 +9,7 @@
  * distance, against this lap's time. The difference is in whole seconds, as
  * lap times are: under half a second either way is even.
  *
- * The same file is in Run (Running) and RunLVGL, kept identical.
+ * The same file is in Run (Running), RunLVGL and Track Run, kept identical.
  ******************************************************************************
  */
 

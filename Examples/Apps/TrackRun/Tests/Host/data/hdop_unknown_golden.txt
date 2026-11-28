@@ -1,0 +1,814 @@
+counter ev 90 0 1 1089502 84002 414.702667 414.702667
+counter ev 174 0 2 1173687 84185 414.702667 829.405334
+counter ev 259 0 3 1258629 84942 414.702667 1244.10803
+counter ev 344 0 4 1343941 85312 414.702667 1658.81067
+counter ev 449 0 5 1448650 84709 415.32428 2074.13501
+counter ev 548 0 6 1547144 98494 430.03363 2504.16846
+counter ev 646 0 7 1645413 98269 430.03363 2934.20215
+counter ev 743 0 8 1742449 97036 430.03363 3364.23584
+counter ev 839 0 9 1838286 95837 430.03363 3794.26953
+counter tot 0 0
+counter tot 3 0
+counter tot 6 0
+counter tot 9 0
+counter tot 12 35.1172638
+counter tot 15 51.8583565
+counter tot 18 65.9619904
+counter tot 21 81.5762482
+counter tot 24 98.7541046
+counter tot 27 117.7043
+counter tot 30 130.513626
+counter tot 33 145.779861
+counter tot 36 163.902176
+counter tot 39 176.12471
+counter tot 42 189.660233
+counter tot 45 207.443802
+counter tot 48 221.072083
+counter tot 51 232.371048
+counter tot 54 251.045242
+counter tot 57 269.562317
+counter tot 60 285.295471
+counter tot 63 305.860046
+counter tot 66 324.55719
+counter tot 69 339.375183
+counter tot 72 357.028259
+counter tot 75 366.509705
+counter tot 78 388.854431
+counter tot 81 403.622009
+counter tot 84 406.40863
+counter tot 87 406.40863
+counter tot 90 416.075806
+counter tot 93 430.498413
+counter tot 96 446.280029
+counter tot 99 458.821899
+counter tot 102 470.913055
+counter tot 105 487.041809
+counter tot 108 499.685822
+counter tot 111 512.557373
+counter tot 114 528.511719
+counter tot 117 539.792114
+counter tot 120 554.741455
+counter tot 123 570.935425
+counter tot 126 585.359619
+counter tot 129 602.618774
+counter tot 132 619.386414
+counter tot 135 632.688049
+counter tot 138 647.698181
+counter tot 141 665.046265
+counter tot 144 678.18103
+counter tot 147 692.704956
+counter tot 150 705.796631
+counter tot 153 722.21698
+counter tot 156 736.956177
+counter tot 159 752.189453
+counter tot 162 765.4104
+counter tot 165 779.601318
+counter tot 168 797.303223
+counter tot 171 811.2854
+counter tot 174 831.996704
+counter tot 177 842.851562
+counter tot 180 855.224792
+counter tot 183 869.852844
+counter tot 186 885.003845
+counter tot 189 900.30365
+counter tot 192 916.281982
+counter tot 195 928.103577
+counter tot 198 941.437012
+counter tot 201 956.177917
+counter tot 204 972.009705
+counter tot 207 984.660828
+counter tot 210 998.648926
+counter tot 213 1016.33936
+counter tot 216 1031.43091
+counter tot 219 1047.07385
+counter tot 222 1059.90112
+counter tot 225 1077.00574
+counter tot 228 1091.08545
+counter tot 231 1105.22559
+counter tot 234 1120.93677
+counter tot 237 1139.19214
+counter tot 240 1152.17969
+counter tot 243 1169.61353
+counter tot 246 1179.39795
+counter tot 249 1196.49658
+counter tot 252 1213.99731
+counter tot 255 1225.13208
+counter tot 258 1235.81396
+counter tot 261 1256.50891
+counter tot 264 1272.91772
+counter tot 267 1286.3053
+counter tot 270 1303.90698
+counter tot 273 1320.77222
+counter tot 276 1339.9397
+counter tot 279 1354.48743
+counter tot 282 1370.13171
+counter tot 285 1383.91357
+counter tot 288 1398.1106
+counter tot 291 1412.87244
+counter tot 294 1425.59937
+counter tot 297 1443.36963
+counter tot 300 1460.55225
+counter tot 303 1476.01794
+counter tot 306 1490.15527
+counter tot 309 1505.86121
+counter tot 312 1524.59082
+counter tot 315 1538.57227
+counter tot 318 1555.3407
+counter tot 321 1566.7876
+counter tot 324 1580.0116
+counter tot 327 1594.35522
+counter tot 330 1607.93555
+counter tot 333 1623.67603
+counter tot 336 1634.52209
+counter tot 339 1650.47144
+counter tot 342 1650.5166
+counter tot 345 1662.95605
+counter tot 348 1672.2074
+counter tot 351 1689.01648
+counter tot 354 1702.29041
+counter tot 357 1718.50903
+counter tot 360 1736.14771
+counter tot 363 1746.03259
+counter tot 366 1762.3772
+counter tot 369 1777.14368
+counter tot 372 1791.92664
+counter tot 375 1803.25183
+counter tot 378 1821.96802
+counter tot 381 1837.35205
+counter tot 384 1849.09229
+counter tot 387 1864.72717
+counter tot 390 1880.04199
+counter tot 393 1893.84766
+counter tot 396 1909.3324
+counter tot 399 1924.70288
+counter tot 402 1936.4259
+counter tot 405 1948.46094
+counter tot 408 1961.27954
+counter tot 411 1977.54346
+counter tot 414 1994.53467
+counter tot 417 2006.56799
+counter tot 420 2018.10425
+counter tot 423 2032.52222
+counter tot 426 2046.42749
+counter tot 429 2056.69849
+counter tot 432 2056.69849
+counter tot 435 2056.69849
+counter tot 438 2056.69849
+counter tot 441 2056.69849
+counter tot 444 2056.69849
+counter tot 447 2056.69849
+counter tot 450 2078.29785
+counter tot 453 2095.19067
+counter tot 456 2109.10352
+counter tot 459 2120.89526
+counter tot 462 2135.45215
+counter tot 465 2151.29785
+counter tot 468 2167.39453
+counter tot 471 2179.01147
+counter tot 474 2190.61035
+counter tot 477 2203.37671
+counter tot 480 2217.6687
+counter tot 483 2230.45996
+counter tot 486 2246.21631
+counter tot 489 2257.55908
+counter tot 492 2267.19995
+counter tot 495 2282.06616
+counter tot 498 2297.33887
+counter tot 501 2312.52368
+counter tot 504 2327.12231
+counter tot 507 2338.35034
+counter tot 510 2354.04053
+counter tot 513 2365.38672
+counter tot 516 2380.77905
+counter tot 519 2395.24268
+counter tot 522 2407.25708
+counter tot 525 2419.34326
+counter tot 528 2435.66821
+counter tot 531 2448.41431
+counter tot 534 2466.21411
+counter tot 537 2478.96582
+counter tot 540 2490.46924
+counter tot 543 2495.56787
+counter tot 546 2495.56787
+counter tot 549 2511.92334
+counter tot 552 2524.01294
+counter tot 555 2536.27881
+counter tot 558 2547.65015
+counter tot 561 2560.65259
+counter tot 564 2573.52368
+counter tot 567 2586.96509
+counter tot 570 2598.53369
+counter tot 573 2613.54761
+counter tot 576 2623.63843
+counter tot 579 2635.52734
+counter tot 582 2651.06006
+counter tot 585 2666.34277
+counter tot 588 2680.69873
+counter tot 591 2695.07349
+counter tot 594 2709.38501
+counter tot 597 2723.65112
+counter tot 600 2735.3374
+counter tot 603 2749.79883
+counter tot 606 2764.36523
+counter tot 609 2777.14404
+counter tot 612 2787.89307
+counter tot 615 2804.01904
+counter tot 618 2817.49512
+counter tot 621 2828.39062
+counter tot 624 2844.25586
+counter tot 627 2856.78198
+counter tot 630 2867.27026
+counter tot 633 2882.59814
+counter tot 636 2892.23584
+counter tot 639 2905.08252
+counter tot 642 2916.40503
+counter tot 645 2925.60156
+counter tot 648 2944.521
+counter tot 651 2957.31787
+counter tot 654 2971.91919
+counter tot 657 2985.18042
+counter tot 660 3001.9585
+counter tot 663 3018.69067
+counter tot 666 3030.8894
+counter tot 669 3047.00781
+counter tot 672 3056.20435
+counter tot 675 3069.67236
+counter tot 678 3083.59033
+counter tot 681 3096.63281
+counter tot 684 3112.25806
+counter tot 687 3124.21191
+counter tot 690 3139.29297
+counter tot 693 3152.40381
+counter tot 696 3169.90234
+counter tot 699 3182.38403
+counter tot 702 3196.45801
+counter tot 705 3209.89062
+counter tot 708 3222.38013
+counter tot 711 3235.83032
+counter tot 714 3246.94116
+counter tot 717 3260.25439
+counter tot 720 3272.00146
+counter tot 723 3289.82202
+counter tot 726 3303.15405
+counter tot 729 3316.75195
+counter tot 732 3327.46826
+counter tot 735 3342.90356
+counter tot 738 3353.01172
+counter tot 741 3355.63525
+counter tot 744 3370.28687
+counter tot 747 3384.23657
+counter tot 750 3400.38379
+counter tot 753 3412.94116
+counter tot 756 3427.76782
+counter tot 759 3439.71118
+counter tot 762 3455.93335
+counter tot 765 3467.66284
+counter tot 768 3477.11426
+counter tot 771 3491.18677
+counter tot 774 3502.82275
+counter tot 777 3515.25732
+counter tot 780 3529.61206
+counter tot 783 3543.42139
+counter tot 786 3555.68213
+counter tot 789 3567.78809
+counter tot 792 3580.98291
+counter tot 795 3592.01904
+counter tot 798 3605.46387
+counter tot 801 3619.46606
+counter tot 804 3631.84302
+counter tot 807 3642.62207
+counter tot 810 3655.59888
+counter tot 813 3671.9917
+counter tot 816 3688.90918
+counter tot 819 3701.16528
+counter tot 822 3714.36816
+counter tot 825 3728.41162
+counter tot 828 3743.15991
+counter tot 831 3756.03149
+counter tot 834 3769.13525
+counter tot 837 3781.43457
+counter tot 840 3803.43994
+counter tot 843 3815.34253
+counter tot 846 3828.1333
+scratch ev 90 0 1 1089502 84002 414.702667 414.702667 1
+scratch ev 93 2 1 1089153 83653 0 414.702667 1
+scratch ev 142 3 0 1142000 0 0 414.702667 1
+scratch ev 142 6 0 1142000 0 0 414.702667 2
+scratch ev 174 0 2 1173915 84762 414.702667 829.405334 2
+scratch ev 177 2 2 1173781 84628 0 829.405334 2
+scratch ev 259 0 3 1258868 85087 414.702667 1244.10803 2
+scratch ev 262 2 3 1258896 85115 0 1244.10803 2
+scratch ev 345 0 4 1344727 85831 414.702667 1658.81067 2
+scratch ev 348 4 0 1348000 0 0 1658.81067 2
+scratch ev 348 2 4 1344745 85849 0 1658.81067 2
+scratch ev 450 0 5 1449000 84255 416.047668 2074.8584 2
+scratch ev 547 0 6 1546156 97156 430.03363 2504.89209 2
+scratch ev 550 2 6 1546446 97446 0 2504.89209 2
+scratch ev 645 0 7 1644643 98197 430.03363 2934.92554 2
+scratch ev 648 2 7 1644757 98311 0 2934.92554 2
+scratch ev 742 0 8 1741628 96871 430.03363 3364.95923 2
+scratch ev 745 2 8 1741739 96982 0 3364.95923 2
+scratch ev 839 0 9 1838134 96395 430.03363 3794.99292 2
+scratch ev 842 2 9 1838040 96301 0 3794.99292 2
+scratch tot 0 0 0
+scratch tot 3 0 0
+scratch tot 6 0 1
+scratch tot 9 0 1
+scratch tot 12 35.1172638 1
+scratch tot 15 51.8583565 1
+scratch tot 18 65.9619904 1
+scratch tot 21 81.5762482 1
+scratch tot 24 98.7541046 1
+scratch tot 27 117.7043 1
+scratch tot 30 130.513626 1
+scratch tot 33 145.779861 1
+scratch tot 36 163.902176 1
+scratch tot 39 176.12471 1
+scratch tot 42 189.660233 1
+scratch tot 45 207.443802 1
+scratch tot 48 221.072083 1
+scratch tot 51 232.371048 1
+scratch tot 54 251.045242 1
+scratch tot 57 269.562317 1
+scratch tot 60 285.295471 1
+scratch tot 63 305.860046 1
+scratch tot 66 324.55719 1
+scratch tot 69 339.375183 1
+scratch tot 72 357.028259 1
+scratch tot 75 366.509705 1
+scratch tot 78 388.854431 1
+scratch tot 81 403.622009 1
+scratch tot 84 406.40863 1
+scratch tot 87 406.40863 1
+scratch tot 90 416.075806 1
+scratch tot 93 430.498413 1
+scratch tot 96 446.280029 1
+scratch tot 99 458.821899 1
+scratch tot 102 470.913055 1
+scratch tot 105 487.041809 1
+scratch tot 108 499.685822 1
+scratch tot 111 512.557373 1
+scratch tot 114 528.511719 1
+scratch tot 117 539.792114 1
+scratch tot 120 554.741455 1
+scratch tot 123 570.935425 1
+scratch tot 126 585.359619 1
+scratch tot 129 602.618774 1
+scratch tot 132 619.386414 1
+scratch tot 135 632.688049 1
+scratch tot 138 647.698181 1
+scratch tot 141 665.046265 1
+scratch tot 144 678.785522 2
+scratch tot 147 698.057251 2
+scratch tot 150 711.218628 2
+scratch tot 153 724.307861 2
+scratch tot 156 736.740845 2
+scratch tot 159 754.377319 2
+scratch tot 162 769.137817 2
+scratch tot 165 782.42981 2
+scratch tot 168 800.251953 2
+scratch tot 171 814.665649 2
+scratch tot 174 830.077881 2
+scratch tot 177 846.801392 2
+scratch tot 180 859.56366 2
+scratch tot 183 870.092407 2
+scratch tot 186 884.382996 2
+scratch tot 189 899.613159 2
+scratch tot 192 916.638306 2
+scratch tot 195 927.050049 2
+scratch tot 198 940.987915 2
+scratch tot 201 954.475891 2
+scratch tot 204 971.296021 2
+scratch tot 207 986.257568 2
+scratch tot 210 1000.3866 2
+scratch tot 213 1018.15216 2
+scratch tot 216 1032.78516 2
+scratch tot 219 1048.55371 2
+scratch tot 222 1062.37927 2
+scratch tot 225 1076.54651 2
+scratch tot 228 1094.81445 2
+scratch tot 231 1109.85229 2
+scratch tot 234 1124.65552 2
+scratch tot 237 1136.76575 2
+scratch tot 240 1152.99121 2
+scratch tot 243 1170.84082 2
+scratch tot 246 1183.2251 2
+scratch tot 249 1195.93835 2
+scratch tot 252 1209.74951 2
+scratch tot 255 1220.85669 2
+scratch tot 258 1236.70984 2
+scratch tot 261 1255.20337 2
+scratch tot 264 1266.33508 2
+scratch tot 267 1278.1333 2
+scratch tot 270 1294.92297 2
+scratch tot 273 1307.11853 2
+scratch tot 276 1322.33704 2
+scratch tot 279 1334.92651 2
+scratch tot 282 1353.52051 2
+scratch tot 285 1365.60583 2
+scratch tot 288 1382.55164 2
+scratch tot 291 1398.34363 2
+scratch tot 294 1415.40552 2
+scratch tot 297 1433.29895 2
+scratch tot 300 1443.7655 2
+scratch tot 303 1460.96106 2
+scratch tot 306 1479.14771 2
+scratch tot 309 1491.82312 2
+scratch tot 312 1508.57642 2
+scratch tot 315 1525.42151 2
+scratch tot 318 1537.65869 2
+scratch tot 321 1550.04309 2
+scratch tot 324 1565.24878 2
+scratch tot 327 1578.5437 2
+scratch tot 330 1590.90198 2
+scratch tot 333 1604.69031 2
+scratch tot 336 1617.80627 2
+scratch tot 339 1631.5603 2
+scratch tot 342 1645.32812 2
+scratch tot 345 1659.56567 2
+scratch tot 348 1671.34888 2
+scratch tot 351 1688.69592 2
+scratch tot 354 1703.90112 2
+scratch tot 357 1716.72424 2
+scratch tot 360 1737.93176 2
+scratch tot 363 1748.44995 2
+scratch tot 366 1764.96924 2
+scratch tot 369 1780.16345 2
+scratch tot 372 1795.15735 2
+scratch tot 375 1814.39526 2
+scratch tot 378 1827.44678 2
+scratch tot 381 1843.42114 2
+scratch tot 384 1858.33472 2
+scratch tot 387 1872.44592 2
+scratch tot 390 1890.45544 2
+scratch tot 393 1907.24072 2
+scratch tot 396 1916.39087 2
+scratch tot 399 1933.91455 2
+scratch tot 402 1947.13647 2
+scratch tot 405 1961.98022 2
+scratch tot 408 1973.69336 2
+scratch tot 411 1988.06104 2
+scratch tot 414 2002.04602 2
+scratch tot 417 2016.48035 2
+scratch tot 420 2030.65381 2
+scratch tot 423 2039.19043 2
+scratch tot 426 2058.81543 2
+scratch tot 429 2073.01343 2
+scratch tot 432 2073.01343 2
+scratch tot 435 2073.01343 2
+scratch tot 438 2073.01343 2
+scratch tot 441 2073.01343 2
+scratch tot 444 2073.01343 2
+scratch tot 447 2073.01343 2
+scratch tot 450 2082.69189 2
+scratch tot 453 2090.88647 2
+scratch tot 456 2107.86572 2
+scratch tot 459 2122.18799 2
+scratch tot 462 2134.45679 2
+scratch tot 465 2147.10449 2
+scratch tot 468 2164.75586 2
+scratch tot 471 2178.00024 2
+scratch tot 474 2191.40015 2
+scratch tot 477 2202.11353 2
+scratch tot 480 2214.34106 2
+scratch tot 483 2226.68091 2
+scratch tot 486 2240.61841 2
+scratch tot 489 2248.13403 2
+scratch tot 492 2260.7478 2
+scratch tot 495 2274.09888 2
+scratch tot 498 2290.44629 2
+scratch tot 501 2300.44824 2
+scratch tot 504 2314.32227 2
+scratch tot 507 2327.69409 2
+scratch tot 510 2342.09131 2
+scratch tot 513 2357.90601 2
+scratch tot 516 2371.04639 2
+scratch tot 519 2382.99683 2
+scratch tot 522 2396.65259 2
+scratch tot 525 2408.46484 2
+scratch tot 528 2422.3186 2
+scratch tot 531 2436.22607 2
+scratch tot 534 2451.40967 2
+scratch tot 537 2462.47266 2
+scratch tot 540 2475.25 2
+scratch tot 543 2489.5498 2
+scratch tot 546 2504.44556 2
+scratch tot 549 2515.84131 2
+scratch tot 552 2527.80249 2
+scratch tot 555 2545.65649 2
+scratch tot 558 2556.93579 2
+scratch tot 561 2567.76099 2
+scratch tot 564 2579.84033 2
+scratch tot 567 2594.39941 2
+scratch tot 570 2610.75781 2
+scratch tot 573 2619.63306 2
+scratch tot 576 2634.22998 2
+scratch tot 579 2644.59009 2
+scratch tot 582 2662.1543 2
+scratch tot 585 2674.75195 2
+scratch tot 588 2683.20435 2
+scratch tot 591 2701.2229 2
+scratch tot 594 2712.69189 2
+scratch tot 597 2727.32153 2
+scratch tot 600 2740.37451 2
+scratch tot 603 2754.52344 2
+scratch tot 606 2767.85962 2
+scratch tot 609 2782.41846 2
+scratch tot 612 2798.06689 2
+scratch tot 615 2811.15942 2
+scratch tot 618 2822.00952 2
+scratch tot 621 2835.37085 2
+scratch tot 624 2848.3064 2
+scratch tot 627 2863.52515 2
+scratch tot 630 2872.97314 2
+scratch tot 633 2886.08008 2
+scratch tot 636 2895.91943 2
+scratch tot 639 2910.29712 2
+scratch tot 642 2922.12256 2
+scratch tot 645 2935.80518 2
+scratch tot 648 2948.8042 2
+scratch tot 651 2960.38013 2
+scratch tot 654 2976.43604 2
+scratch tot 657 2987.90137 2
+scratch tot 660 3003.37866 2
+scratch tot 663 3016.10352 2
+scratch tot 666 3032.21997 2
+scratch tot 669 3046.34912 2
+scratch tot 672 3059.4021 2
+scratch tot 675 3070.354 2
+scratch tot 678 3087.47778 2
+scratch tot 681 3098.7998 2
+scratch tot 684 3113.18335 2
+scratch tot 687 3126.66553 2
+scratch tot 690 3141.01733 2
+scratch tot 693 3153.37549 2
+scratch tot 696 3167.19849 2
+scratch tot 699 3178.89819 2
+scratch tot 702 3189.5354 2
+scratch tot 705 3206.82227 2
+scratch tot 708 3217.46924 2
+scratch tot 711 3229.0437 2
+scratch tot 714 3243.87549 2
+scratch tot 717 3255.3877 2
+scratch tot 720 3270.02808 2
+scratch tot 723 3282.41016 2
+scratch tot 726 3294.89331 2
+scratch tot 729 3308.69116 2
+scratch tot 732 3320.33228 2
+scratch tot 735 3338.59521 2
+scratch tot 738 3349.1626 2
+scratch tot 741 3363.61768 2
+scratch tot 744 3374.84668 2
+scratch tot 747 3391.49927 2
+scratch tot 750 3406.26855 2
+scratch tot 753 3417.04932 2
+scratch tot 756 3431.22046 2
+scratch tot 759 3446.48071 2
+scratch tot 762 3457.50439 2
+scratch tot 765 3472.50024 2
+scratch tot 768 3487.75049 2
+scratch tot 771 3497.98877 2
+scratch tot 774 3508.59473 2
+scratch tot 777 3524.40356 2
+scratch tot 780 3535.13135 2
+scratch tot 783 3548.78467 2
+scratch tot 786 3564.72461 2
+scratch tot 789 3574.95361 2
+scratch tot 792 3585.50122 2
+scratch tot 795 3599.47754 2
+scratch tot 798 3614.22998 2
+scratch tot 801 3623.57666 2
+scratch tot 804 3637.82324 2
+scratch tot 807 3651.66748 2
+scratch tot 810 3666.01074 2
+scratch tot 813 3678.31934 2
+scratch tot 816 3695.39502 2
+scratch tot 819 3708.2666 2
+scratch tot 822 3721.11719 2
+scratch tot 825 3734.07373 2
+scratch tot 828 3746.0769 2
+scratch tot 831 3759.8562 2
+scratch tot 834 3777.86426 2
+scratch tot 837 3790.63574 2
+scratch tot 840 3802.95752 2
+scratch tot 843 3818.46411 2
+scratch tot 846 3834.53857 2
+scratch end 3834.53857 2 2
+stored ev 87 0 1 1086260 80760 400 400 2
+stored ev 90 2 1 1086304 80804 0 400 2
+stored ev 169 0 2 1168156 81852 400 800 2
+stored ev 172 2 2 1167779 81475 0 800 2
+stored ev 250 0 3 1249029 81250 400 1200 2
+stored ev 253 2 3 1248614 80835 0 1200 2
+stored ev 336 0 4 1335945 87331 430.03363 1630.03369 2
+stored ev 339 2 4 1335811 87197 0 1630.03369 2
+stored ev 425 0 5 1424657 88846 430.03363 2060.06738 2
+stored ev 428 2 5 1424408 88597 0 2060.06738 2
+stored ev 512 0 6 1511653 87245 430.03363 2490.10083 2
+stored ev 515 2 6 1511725 87317 0 2490.10083 2
+stored ev 601 0 7 1600926 89201 430.03363 2920.13452 2
+stored ev 604 2 7 1600422 88697 0 2920.13452 2
+stored tot 0 0 0
+stored tot 3 0 0
+stored tot 6 0 2
+stored tot 9 17.5377159 2
+stored tot 12 34.015583 2
+stored tot 15 50.0108452 2
+stored tot 18 65.7791519 2
+stored tot 21 81.1683807 2
+stored tot 24 95.5344238 2
+stored tot 27 112.655128 2
+stored tot 30 125.787636 2
+stored tot 33 141.73056 2
+stored tot 36 156.159912 2
+stored tot 39 170.75882 2
+stored tot 42 186.875671 2
+stored tot 45 198.664764 2
+stored tot 48 211.960083 2
+stored tot 51 227.301529 2
+stored tot 54 241.860474 2
+stored tot 57 255.111298 2
+stored tot 60 270.528839 2
+stored tot 63 281.486938 2
+stored tot 66 294.214172 2
+stored tot 69 312.17688 2
+stored tot 72 324.77597 2
+stored tot 75 337.597931 2
+stored tot 78 354.729309 2
+stored tot 81 369.703064 2
+stored tot 84 386.335388 2
+stored tot 87 403.203735 2
+stored tot 90 420.977325 2
+stored tot 93 433.212463 2
+stored tot 96 451.825806 2
+stored tot 99 467.142029 2
+stored tot 102 479.196411 2
+stored tot 105 495.760498 2
+stored tot 108 509.841736 2
+stored tot 111 524.27002 2
+stored tot 114 537.868042 2
+stored tot 117 553.046448 2
+stored tot 120 565.341553 2
+stored tot 123 583.266907 2
+stored tot 126 590.967285 2
+stored tot 129 608.727783 2
+stored tot 132 623.953064 2
+stored tot 135 638.297363 2
+stored tot 138 655.350159 2
+stored tot 141 666.651245 2
+stored tot 144 679.549683 2
+stored tot 147 695.865051 2
+stored tot 150 710.122803 2
+stored tot 153 724.21582 2
+stored tot 156 738.613037 2
+stored tot 159 755.512573 2
+stored tot 162 769.665649 2
+stored tot 165 786.556885 2
+stored tot 168 799.108887 2
+stored tot 171 817.357422 2
+stored tot 174 833.307495 2
+stored tot 177 849.974731 2
+stored tot 180 863.876892 2
+stored tot 183 878.21991 2
+stored tot 186 891.992432 2
+stored tot 189 910.371033 2
+stored tot 192 920.377563 2
+stored tot 195 933.685425 2
+stored tot 198 948.927673 2
+stored tot 201 963.155884 2
+stored tot 204 977.640015 2
+stored tot 207 989.169006 2
+stored tot 210 1008.66516 2
+stored tot 213 1022.99347 2
+stored tot 216 1034.41211 2
+stored tot 219 1048.64417 2
+stored tot 222 1065.31616 2
+stored tot 225 1079.58618 2
+stored tot 228 1096.25696 2
+stored tot 231 1110.68555 2
+stored tot 234 1123.01172 2
+stored tot 237 1140.0835 2
+stored tot 240 1154.85059 2
+stored tot 243 1170.14124 2
+stored tot 246 1187.56409 2
+stored tot 249 1199.77722 2
+stored tot 252 1217.68884 2
+stored tot 255 1234.52466 2
+stored tot 258 1248.45776 2
+stored tot 261 1262.95459 2
+stored tot 264 1278.41443 2
+stored tot 267 1287.78345 2
+stored tot 270 1304.24475 2
+stored tot 273 1318.25281 2
+stored tot 276 1332.71069 2
+stored tot 279 1345.60706 2
+stored tot 282 1357.77295 2
+stored tot 285 1372.5083 2
+stored tot 288 1388.7218 2
+stored tot 291 1401.23474 2
+stored tot 294 1417.16882 2
+stored tot 297 1432.31384 2
+stored tot 300 1446.72937 2
+stored tot 303 1462.32861 2
+stored tot 306 1480.21326 2
+stored tot 309 1494.35449 2
+stored tot 312 1506.02515 2
+stored tot 315 1522.17993 2
+stored tot 318 1539.62561 2
+stored tot 321 1554.59692 2
+stored tot 324 1570.05005 2
+stored tot 327 1585.46143 2
+stored tot 330 1599.37854 2
+stored tot 333 1613.24402 2
+stored tot 336 1630.39233 2
+stored tot 339 1646.64771 2
+stored tot 342 1656.95337 2
+stored tot 345 1672.78101 2
+stored tot 348 1687.01624 2
+stored tot 351 1702.60059 2
+stored tot 354 1714.34692 2
+stored tot 357 1726.20337 2
+stored tot 360 1738.45264 2
+stored tot 363 1753.85718 2
+stored tot 366 1770.28467 2
+stored tot 369 1781.35193 2
+stored tot 372 1796.91333 2
+stored tot 375 1814.54199 2
+stored tot 378 1828.68591 2
+stored tot 381 1844.51086 2
+stored tot 384 1861.36194 2
+stored tot 387 1871.20911 2
+stored tot 390 1891.97009 2
+stored tot 393 1907.375 2
+stored tot 396 1921.72766 2
+stored tot 399 1937.16492 2
+stored tot 402 1951.646 2
+stored tot 405 1963.68701 2
+stored tot 408 1981.84448 2
+stored tot 411 1992.62744 2
+stored tot 414 2008.01318 2
+stored tot 417 2024.28589 2
+stored tot 420 2038.93384 2
+stored tot 423 2052.1897 2
+stored tot 426 2067.59863 2
+stored tot 429 2081.79053 2
+stored tot 432 2097.22437 2
+stored tot 435 2109.19995 2
+stored tot 438 2123.64575 2
+stored tot 441 2138.50366 2
+stored tot 444 2153.37061 2
+stored tot 447 2166.40869 2
+stored tot 450 2178.78687 2
+stored tot 453 2197.93066 2
+stored tot 456 2213.21289 2
+stored tot 459 2229.25806 2
+stored tot 462 2241.71387 2
+stored tot 465 2257.09619 2
+stored tot 468 2273.86841 2
+stored tot 471 2288.75171 2
+stored tot 474 2304.51172 2
+stored tot 477 2321.64868 2
+stored tot 480 2336.27417 2
+stored tot 483 2353.53516 2
+stored tot 486 2366.97852 2
+stored tot 489 2379.90771 2
+stored tot 492 2392.2627 2
+stored tot 495 2405.50928 2
+stored tot 498 2419.02368 2
+stored tot 501 2432.29834 2
+stored tot 504 2449.17188 2
+stored tot 507 2463.23218 2
+stored tot 510 2477.85669 2
+stored tot 513 2497.25317 2
+stored tot 516 2509.94727 2
+stored tot 519 2523.81348 2
+stored tot 522 2535.80713 2
+stored tot 525 2551.38428 2
+stored tot 528 2566.77319 2
+stored tot 531 2585.27759 2
+stored tot 534 2599.04028 2
+stored tot 537 2614.02759 2
+stored tot 540 2628.82129 2
+stored tot 543 2641.70312 2
+stored tot 546 2657.198 2
+stored tot 549 2671.61401 2
+stored tot 552 2688.08276 2
+stored tot 555 2704.31738 2
+stored tot 558 2719.20532 2
+stored tot 561 2733.30176 2
+stored tot 564 2745.21899 2
+stored tot 567 2760.92651 2
+stored tot 570 2775.09546 2
+stored tot 573 2787.55615 2
+stored tot 576 2800.8042 2
+stored tot 579 2816.68066 2
+stored tot 582 2831.32422 2
+stored tot 585 2845.22485 2
+stored tot 588 2855.65405 2
+stored tot 591 2874.22119 2
+stored tot 594 2887.35986 2
+stored tot 597 2902.64502 2
+stored tot 600 2915.83545 2
+stored tot 603 2934.0166 2
+stored tot 606 2948.77832 2
+stored end 2958.43823 2 3

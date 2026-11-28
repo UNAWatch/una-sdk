@@ -1,0 +1,219 @@
+/**
+ ******************************************************************************
+ * @file    ScreenManager.cpp
+ * @brief   Owns the active screen and switches between them.
+ ******************************************************************************
+ */
+
+#include "gui/screens/ScreenManager.hpp"
+
+#include "lvgl.h"
+
+#define LOG_MODULE_PRX      "ScreenManager"
+#define LOG_MODULE_LEVEL    LOG_LEVEL_INFO
+#include "SDK/UnaLogger/Logger.h"
+
+#include "gui/model/Model.hpp"
+#include "gui/screens/Screen.hpp"
+#include "gui/screens/MainScreen.hpp"
+#include "gui/screens/MenuIntervalsScreen.hpp"
+#include "gui/screens/MenuIntervalsRepeatsScreen.hpp"
+#include "gui/screens/MenuIntervalsMetricScreen.hpp"
+#include "gui/screens/IntervalsPickerScreen.hpp"
+#include "gui/screens/MenuSettingsScreen.hpp"
+#include "gui/screens/MenuAlertsScreen.hpp"
+#include "gui/screens/MenuAlertValueScreen.hpp"
+#include "gui/screens/AlertSavedScreen.hpp"
+#include "gui/screens/MenuRunAlertsScreen.hpp"
+#include "gui/screens/MenuRunWalkScreen.hpp"
+#include "gui/screens/MenuRunLimitsScreen.hpp"
+#include "gui/screens/MenuRunPaceLimitScreen.hpp"
+#include "gui/screens/RunAlertPickerScreen.hpp"
+#include "gui/screens/MenuRunHrListScreen.hpp"
+#include "gui/screens/RunAlertSavedScreen.hpp"
+#include "gui/screens/TrackStartConfirmScreen.hpp"
+#include "gui/screens/TrackIntervalsCountdownScreen.hpp"
+#include "gui/screens/TrackScreen.hpp"
+#include "gui/screens/TrackIntervalsAlertScreen.hpp"
+#include "gui/screens/TrackIntervalsCompletedScreen.hpp"
+#include "gui/screens/TrackActionScreen.hpp"
+#include "gui/screens/TrackHoldConfirmScreen.hpp"
+#include "gui/screens/TrackLapScreen.hpp"
+#include "gui/screens/TrackRunAlertScreen.hpp"
+#include "gui/screens/TrackResultScreen.hpp"
+#include "gui/screens/TrackSummaryScreen.hpp"
+#include "gui/screens/TrackWorkoutStepScreen.hpp"
+#include "gui/screens/WorkoutDetailsScreen.hpp"
+#include "gui/screens/WorkoutListScreen.hpp"
+#include "gui/screens/WorkoutMenuScreen.hpp"
+#include "gui/screens/LaneScreen.hpp"
+#include "gui/screens/TrackNoticeScreen.hpp"
+#include "gui/screens/TracksScreen.hpp"
+#include "gui/screens/TrackDetailScreen.hpp"
+
+ScreenManager& ScreenManager::instance()
+{
+    static ScreenManager sInstance;
+    return sInstance;
+}
+
+void ScreenManager::start(Model& model, ScreenId first)
+{
+    mModel = &model;
+    switchNow(first);
+}
+
+bool ScreenManager::goTo(ScreenId id)
+{
+    if (id == ScreenId::Track && mModel) {
+        // Each goes back to the Track screen when it is done, which opens the
+        // next one waiting.
+        id = trackOrPopup();
+    }
+    mPending = id;
+    if (!mPendingSet) {
+        if (lv_async_call(&ScreenManager::asyncCb, this) != LV_RESULT_OK) {
+            // LVGL's pool had no room for the request. Leave the flag clear
+            // so the next goTo() tries again rather than waiting for a call
+            // that will never come.
+            LOG_ERROR("Switch to screen %u could not be scheduled\n", static_cast<unsigned>(id));
+            return false;
+        }
+        mPendingSet = true;
+    }
+    return true;
+}
+
+bool ScreenManager::goToWaitingPopup()
+{
+    const ScreenId id = mModel ? trackOrPopup() : ScreenId::Track;
+    if (id == ScreenId::Track) {
+        return false;
+    }
+    return goTo(id);
+}
+
+ScreenId ScreenManager::trackOrPopup() const
+{
+    if (mModel->hasStepCard()) {
+        return ScreenId::TrackWorkoutStep;
+    }
+    switch (mModel->waitingPopup()) {
+        case Model::Popup::Lap:       return ScreenId::TrackLap;
+        case Model::Popup::Phase:     return ScreenId::TrackIntervalsAlert;
+        case Model::Popup::RunAlert:  return ScreenId::TrackRunAlert;
+        case Model::Popup::Completed: return ScreenId::TrackIntervalsCompleted;
+        case Model::Popup::Notice:    return ScreenId::TrackNotice;
+        default:                      return ScreenId::Track;
+    }
+}
+
+void ScreenManager::asyncCb(void* user)
+{
+    auto* self = static_cast<ScreenManager*>(user);
+    self->mPendingSet = false;
+    self->switchNow(self->mPending);
+}
+
+void ScreenManager::switchNow(ScreenId id)
+{
+    Screen* next = create(id);
+    if (!next) {
+        LOG_WARNING("No screen for id %u\n", static_cast<unsigned>(id));
+        return;
+    }
+
+    Screen* old = mCurrent;
+    if (old) {
+        old->onHide();
+        mModel->bind(nullptr);
+    }
+
+    // Build and show the new screen, then free the old one: the same order
+    // as the TouchGFX MVP application. Both widget trees exist for the
+    // duration of the switch, so the pool must hold the largest such pair;
+    // the peak logged below is what to size it by.
+    next->create();
+    lv_screen_load(next->root());
+    mCurrent = next;
+
+    if (old) {
+        // ~Screen() runs the derived destructors (which stop timers and
+        // animations) before it deletes the LVGL tree, so a widget destructor
+        // may still touch its objects.
+        delete old;
+    }
+
+    mModel->bind(next);
+    next->onShow();
+
+    // Peak use of LVGL's static pool (LV_MEM_SIZE in lv_conf.h), logged per
+    // screen so the pool can be sized to what the app actually needs.
+    lv_mem_monitor_t mon;
+    lv_mem_monitor(&mon);
+    LOG_INFO("LVGL pool: %u/%u B used, peak %u%%, frag %u%%\n",
+             static_cast<unsigned>(mon.total_size - mon.free_size),
+             static_cast<unsigned>(mon.total_size),
+             static_cast<unsigned>(mon.max_used) * 100u / static_cast<unsigned>(mon.total_size),
+             static_cast<unsigned>(mon.frag_pct));
+}
+
+Screen* ScreenManager::create(ScreenId id)
+{
+    Model& m = *mModel;
+    using Phase  = MenuIntervalsMetricScreen::Phase;
+    using Metric = IntervalsPickerScreen::Metric;
+    using Alert  = MenuAlertValueScreen::Kind;
+
+    switch (id) {
+        case ScreenId::Main:                      return new MainScreen(m);
+
+        case ScreenId::WorkoutToday:              return new WorkoutMenuScreen(m, WorkoutMenuScreen::Kind::Today);
+        case ScreenId::WorkoutList:               return new WorkoutListScreen(m);
+        case ScreenId::WorkoutMenu:               return new WorkoutMenuScreen(m, WorkoutMenuScreen::Kind::Chosen);
+        case ScreenId::WorkoutDetails:            return new WorkoutDetailsScreen(m);
+
+        case ScreenId::MenuIntervals:             return new MenuIntervalsScreen(m);
+        case ScreenId::MenuIntervalsRepeats:      return new MenuIntervalsRepeatsScreen(m);
+        case ScreenId::MenuIntervalsRun:          return new MenuIntervalsMetricScreen(m, Phase::Run);
+        case ScreenId::MenuIntervalsRest:         return new MenuIntervalsMetricScreen(m, Phase::Rest);
+        case ScreenId::MenuIntervalsRunTime:      return new IntervalsPickerScreen(m, Phase::Run, Metric::Time);
+        case ScreenId::MenuIntervalsRunDistance:  return new IntervalsPickerScreen(m, Phase::Run, Metric::Distance);
+        case ScreenId::MenuIntervalsRestTime:     return new IntervalsPickerScreen(m, Phase::Rest, Metric::Time);
+        case ScreenId::MenuIntervalsRestDistance: return new IntervalsPickerScreen(m, Phase::Rest, Metric::Distance);
+
+        case ScreenId::MenuSettings:              return new MenuSettingsScreen(m);
+        case ScreenId::MenuAlerts:                return new MenuAlertsScreen(m);
+        case ScreenId::MenuAlertDistance:         return new MenuAlertValueScreen(m, Alert::Distance);
+        case ScreenId::MenuAlertTime:             return new MenuAlertValueScreen(m, Alert::Time);
+        case ScreenId::MenuAlertDistanceSaved:    return new AlertSavedScreen(m, Alert::Distance);
+        case ScreenId::MenuAlertTimeSaved:        return new AlertSavedScreen(m, Alert::Time);
+        case ScreenId::MenuRunAlerts:             return new MenuRunAlertsScreen(m);
+        case ScreenId::MenuRunWalk:               return new MenuRunWalkScreen(m);
+        case ScreenId::MenuRunPace:               return new MenuRunLimitsScreen(m, MenuRunLimitsScreen::Kind::Pace);
+        case ScreenId::MenuRunHr:                 return new MenuRunLimitsScreen(m, MenuRunLimitsScreen::Kind::HeartRate);
+        case ScreenId::MenuRunPaceLimit:          return new MenuRunPaceLimitScreen(m);
+        case ScreenId::MenuRunAlertPicker:        return new RunAlertPickerScreen(m);
+        case ScreenId::MenuRunHrList:             return new MenuRunHrListScreen(m);
+        case ScreenId::MenuRunAlertSaved:         return new RunAlertSavedScreen(m);
+        case ScreenId::MenuTracks:                return new TracksScreen(m);
+        case ScreenId::MenuTrackDetail:           return new TrackDetailScreen(m);
+        case ScreenId::Lane:                      return new LaneScreen(m);
+
+        case ScreenId::TrackStartConfirm:         return new TrackStartConfirmScreen(m);
+        case ScreenId::TrackIntervalsCountdown:   return new TrackIntervalsCountdownScreen(m);
+        case ScreenId::Track:                     return new TrackScreen(m);
+        case ScreenId::TrackIntervalsAlert:       return new TrackIntervalsAlertScreen(m);
+        case ScreenId::TrackIntervalsCompleted:   return new TrackIntervalsCompletedScreen(m);
+        case ScreenId::TrackWorkoutStep:          return new TrackWorkoutStepScreen(m);
+        case ScreenId::TrackAction:               return new TrackActionScreen(m);
+        case ScreenId::TrackHoldConfirm:          return new TrackHoldConfirmScreen(m);
+        case ScreenId::TrackLap:                  return new TrackLapScreen(m);
+        case ScreenId::TrackRunAlert:             return new TrackRunAlertScreen(m);
+        case ScreenId::TrackSaved:                return new TrackResultScreen(m, TrackResultScreen::Result::Saved);
+        case ScreenId::TrackDiscarded:            return new TrackResultScreen(m, TrackResultScreen::Result::Discarded);
+        case ScreenId::TrackSummary:              return new TrackSummaryScreen(m);
+        case ScreenId::TrackNotice:               return new TrackNoticeScreen(m);
+    }
+    return nullptr;
+}

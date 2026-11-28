@@ -1,0 +1,12 @@
+# Build output: the watch build (build/ at the top level or next to the
+# CMakeLists), the simulator build (Software/Apps/LVGL-GUI/simulator/build)
+# and the host tests (Tests/Host/build).
+build/
+build-*/
+
+# The simulator's mock file system: settings, recorded activities and traces.
+Software/Output/
+
+# Local Visual Studio files.
+.vs/
+*.user
