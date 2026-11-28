@@ -823,7 +823,8 @@ void Tracker::anchor(float rel, uint32_t tMs, float allowM, Events& ev, bool aft
         // As in Run: what was run before the pause and what is run from the
         // resume both count, and the way between does not. The lap's credit
         // runs on from this reading, ahead of the mark or behind it, so its
-        // noise is as likely to add a few metres as to take them off.
+        // noise is as likely to add a few metres as to take them off. The
+        // caller has credited the way from the resume to this reading.
         mUmax    = rel;
         mAltered = true;
     } else if (rel > mUmax + mCfg.outlierM + allowM) {
@@ -1054,6 +1055,14 @@ void Tracker::lineReading(Vec2 p, uint32_t tMs, Events& ev) noexcept
         mNeedAnchor = false;
     } else if (mNeedAnchor) {
         mNeedAnchor = false;
+        // The runner ran on from the resume to this reading: the odometer's
+        // step, which counts the share of the interval after the resume, is
+        // credited, as in Run. No faster than maxSpeedMps since the resume.
+        if (mMode == Mode::Calibrated && counterStep > 0.0f) {
+            const int32_t sinceMs = msDiff(tMs, mResumeT);
+            const float   most    = mCfg.maxSpeedMps * 0.001f * static_cast<float>(sinceMs > 0 ? sinceMs : 0);
+            mLapMetres += counterStep < most ? counterStep : most;
+        }
         anchor(nearest(rel, mUmax), tMs, 0.0f, ev, true);
         return;
     }
